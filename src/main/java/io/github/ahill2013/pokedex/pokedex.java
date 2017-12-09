@@ -6,9 +6,7 @@ import me.sargunvohra.lib.pokekotlin.client.PokeApiClient;
 public class pokedex {
 
     public static void main(String[] args) {
-        PokeApi pokeApi = new PokeApiClient();
 
-        System.out.println(pokeApi.getPokemon("lapras").getTypes());
     }
 
 }
