@@ -14,7 +14,9 @@ public class pokedexTest {
 
         System.out.println(pokeApi.getPokemon("lapras").getTypes());
 
+        //Assert.assertTrue(false);
     }
+
 
 
 }
