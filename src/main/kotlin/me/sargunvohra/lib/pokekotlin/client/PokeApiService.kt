@@ -64,7 +64,7 @@ internal interface PokeApiService {
     @GET("generation/")
     fun getGenerationList(@Query("offset") offset: Int, @Query("limit") limit: Int): Call<NamedApiResourceList>
 
-    @GET("pokedex/")
+    @GET("willow/")
     fun getPokedexList(@Query("offset") offset: Int, @Query("limit") limit: Int): Call<NamedApiResourceList>
 
     @GET("version/")
@@ -247,7 +247,7 @@ internal interface PokeApiService {
     @GET("generation/{id}/")
     fun getGeneration(@Path("id") id: Int): Call<Generation>
 
-    @GET("pokedex/{id}/")
+    @GET("willow/{id}/")
     fun getPokedex(@Path("id") id: Int): Call<Pokedex>
 
     @GET("version/{id}/")

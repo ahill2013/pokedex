@@ -14,7 +14,7 @@ buildscript {
 
 }
 
-group 'io.github.ahill2013.pokedex'
+group 'io.github.ahill2013.willow'
 version '1.0'
 
 apply plugin: 'java'
@@ -24,7 +24,11 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
-    //maven { url 'http://jcenter.bintray.com' }
+    jcenter()
+    maven {
+        //url 'http://jcenter.bintray.com'
+        url "https://jitpack.io"
+    }
 }
 
 dependencies {
@@ -39,6 +43,7 @@ dependencies {
     compile "com.squareup.okhttp3:mockwebserver:$okhttp_version"
     compile "de.schlichtherle.truezip:truezip-file:$truezip_version"
     compile "de.schlichtherle.truezip:truezip-driver-zip:$truezip_version"
+    compile "com.github.austinv11:Discord4J:2.9.3"
 }
 
 compileKotlin {
