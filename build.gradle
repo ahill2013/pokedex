@@ -1,5 +1,9 @@
 buildscript {
     ext.kotlin_version = '1.2.0'
+    ext.retrofit_version = '2.1.0'
+    ext.junit_version = '4.12'
+    ext.okhttp_version = '3.4.1'
+    ext.truezip_version = '7.7.9'
 
     repositories {
         mavenCentral()
@@ -7,6 +11,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
+
 }
 
 group 'io.github.ahill2013.pokedex'
@@ -19,11 +24,21 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    //maven { url 'http://jcenter.bintray.com' }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    //compile 'me.sargunvohra.lib:pokekotlin:2.3.0'
+    compile "com.squareup.retrofit2:retrofit:$retrofit_version"
+    compile "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
+    compile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile "com.squareup.okhttp3:mockwebserver:$okhttp_version"
+    compile "de.schlichtherle.truezip:truezip-file:$truezip_version"
+    compile "de.schlichtherle.truezip:truezip-driver-zip:$truezip_version"
 }
 
 compileKotlin {
