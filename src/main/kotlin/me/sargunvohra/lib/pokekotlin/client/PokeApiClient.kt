@@ -1,5 +1,6 @@
 package me.sargunvohra.lib.pokekotlin.client
 
+import me.sargunvohra.lib.pokekotlin.model.Pokemon
 import retrofit2.Call
 
 class PokeApiClient(
@@ -263,6 +264,8 @@ class PokeApiClient(
     override fun getPokeathlonStat(id: Int) = service.getPokeathlonStat(id).result()
 
     override fun getPokemon(id: Int) = service.getPokemon(id).result()
+
+    override fun getPokemon(name: String) = service.getPokemon(name).result()
 
     override fun getPokemonEncounterList(id: Int) = service.getPokemonEncounterList(id).result()
 

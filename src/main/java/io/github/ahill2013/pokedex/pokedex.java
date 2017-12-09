@@ -8,7 +8,7 @@ public class pokedex {
     public static void main(String[] args) {
         PokeApi pokeApi = new PokeApiClient();
 
-        System.out.println(pokeApi.getPokemon(25).getTypes().size());
+        System.out.println(pokeApi.getPokemon("lapras").getTypes());
     }
 
 }
