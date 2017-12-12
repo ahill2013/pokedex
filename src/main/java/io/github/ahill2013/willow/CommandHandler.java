@@ -14,9 +14,18 @@ public class CommandHandler {
     static {
 
         commandMap.put("ping", (event, args) -> {
-            System.out.println("Sending response");
-            System.out.println();
+            System.out.println("Sending response\n");
             BotUtils.sendMessage(event.getChannel(), "pong");
+        });
+
+        commandMap.put("help", (event, args) -> {
+            StringBuilder helpMsg = new StringBuilder();
+            helpMsg.append("Bot command prefix is: >\n\n");
+            helpMsg.append("Available commands:\n");
+            helpMsg.append("ping").append(" - an easy way to see if the bot is alive");
+
+            System.out.println("sending response\n");
+            BotUtils.sendMessage(event.getChannel(), helpMsg.toString());
         });
 
     }
