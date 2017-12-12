@@ -4,6 +4,7 @@ buildscript {
     ext.junit_version = '4.12'
     ext.okhttp_version = '3.4.1'
     ext.truezip_version = '7.7.9'
+    ext.log4j_version = '2.1'
 
     repositories {
         mavenCentral()
@@ -49,6 +50,10 @@ dependencies {
     compile "de.schlichtherle.truezip:truezip-driver-zip:$truezip_version"
     // Discord4J
     compile "com.github.austinv11:Discord4J:2.9.3"
+    // Log4j
+    compile "org.apache.logging.log4j:log4j-api:$log4j_version"
+    compile "org.apache.logging.log4j:log4j-core:$log4j_version"
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
 }
 
 compileKotlin {
