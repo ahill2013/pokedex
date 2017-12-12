@@ -5,7 +5,7 @@ import me.sargunvohra.lib.pokekotlin.client.PokeApiClient;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class willowTest {
+public class WillowTest {
 
     @Test
     public void main_test() {

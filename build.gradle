@@ -23,18 +23,22 @@ apply plugin: 'kotlin'
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
-    jcenter()
+    mavenCentral()  // pokekotlin jar
+    jcenter()       // Discord4J
     maven {
-        //url 'http://jcenter.bintray.com'
-        url "https://jitpack.io"
+        //url 'http://jcenter.bintray.com'    // pokekotlin jar
+        url "https://jitpack.io"            // Discord4J
     }
 }
 
 dependencies {
+    // kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    // junit
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    // pokekotlin jar
     //compile 'me.sargunvohra.lib:pokekotlin:2.3.0'
+    // pokekotlin src
     compile "com.squareup.retrofit2:retrofit:$retrofit_version"
     compile "com.squareup.retrofit2:converter-gson:$retrofit_version"
     compile "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
@@ -43,6 +47,7 @@ dependencies {
     compile "com.squareup.okhttp3:mockwebserver:$okhttp_version"
     compile "de.schlichtherle.truezip:truezip-file:$truezip_version"
     compile "de.schlichtherle.truezip:truezip-driver-zip:$truezip_version"
+    // Discord4J
     compile "com.github.austinv11:Discord4J:2.9.3"
 }
 
