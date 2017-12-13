@@ -194,5 +194,7 @@ interface PokeApi {
 
     fun getType(id: Int): Type
 
+    fun getType(name: String): Type
+
     fun getLanguage(id: Int): Language
 }

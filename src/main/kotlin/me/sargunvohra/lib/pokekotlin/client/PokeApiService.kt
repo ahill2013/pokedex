@@ -371,6 +371,9 @@ internal interface PokeApiService {
     @GET("type/{id}/")
     fun getType(@Path("id") id: Int): Call<Type>
 
+    @GET("type/{name}/")
+    fun getType(@Path("name") name: String): Call<Type>
+
     // endregion Pokemon
 
     // region Utility

@@ -1,6 +1,6 @@
 package me.sargunvohra.lib.pokekotlin.client
 
-import me.sargunvohra.lib.pokekotlin.model.Pokemon
+import me.sargunvohra.lib.pokekotlin.model.Type
 import retrofit2.Call
 
 class PokeApiClient(
@@ -282,6 +282,8 @@ class PokeApiClient(
     override fun getStat(id: Int) = service.getStat(id).result()
 
     override fun getType(id: Int) = service.getType(id).result()
+
+    override fun getType(name: String) = service.getType(name).result()
 
     // endregion Pokemon
 
