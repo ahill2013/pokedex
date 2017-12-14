@@ -16,7 +16,7 @@ buildscript {
 }
 
 group 'io.github.ahill2013.willow'
-version '1.0'
+version '1.0.0'
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
@@ -61,4 +61,24 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+uploadArchives {
+    repositories {
+        flatDir {
+            dirs 'repos'
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': project.name,
+            'Implementation-Version': version,
+            'Main-Class': 'io.github.ahill2013.willow.Willow'//,
+            //'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
+            //'Class-Path': '-Dlog4j.configurationFile="/home/adam/IdeaProjects/willow/log4j2.xml"'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }
