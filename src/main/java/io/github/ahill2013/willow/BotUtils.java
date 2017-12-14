@@ -14,8 +14,7 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.RequestBuffer;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 class BotUtils {
@@ -42,56 +41,101 @@ class BotUtils {
         EmbedBuilder builder = new EmbedBuilder();
 
         Pokemon pokemon = pokeApi.getPokemon(pokemonType.get(0));
-        StringBuilder type = new StringBuilder();
+        logger.debug("getPokemon API request received");
+        ArrayList<String> type = new ArrayList<>(2);
 
         if (pokemon.getTypes().size() == 2) {
-            type.append(pokemon.getTypes().get(0).getType().getName());
-            type.append(", ");
-            type.append(pokemon.getTypes().get(1).getType().getName());
+            type.add(pokemon.getTypes().get(0).getType().getName());
+            type.add(pokemon.getTypes().get(1).getType().getName());
         } else {
-            type.append(pokemon.getTypes().get(0).getType().getName());
+            type.add(pokemon.getTypes().get(0).getType().getName());
         }
 
 //        logger.debug("Type1: " + type1 + " ; Type2: " + type2);
 
-        StringBuilder weak = new StringBuilder();
-        StringBuilder resist = new StringBuilder();
-        StringBuilder immune = new StringBuilder();
+        ArrayList<String> weak = new ArrayList<>();
+        ArrayList<String> resist = new ArrayList<>();
+        ArrayList<String> immune = new ArrayList<>();
 
         if (pokemon.getTypes().size() == 1) {
 
-            TypeRelations typeRelations = pokeApi.getType(type.toString()).getDamageRelations();
+            logger.trace("Pokemon has 1 type");
 
-            for (int i = 0; i < typeRelations.getDoubleDamageFrom().size(); i++ ) {
-                weak.append(typeRelations.getDoubleDamageFrom().get(i).getName());
-                if (i < typeRelations.getDoubleDamageFrom().size() - 1)
-                    weak.append(", ");
-            }
-            for (int i = 0; i < typeRelations.getHalfDamageFrom().size(); i++ ) {
-                resist.append(typeRelations.getHalfDamageFrom().get(i).getName());
-                if (i < typeRelations.getHalfDamageFrom().size() - 1)
-                    resist.append(", ");
-            }
-            for (int i = 0; i < typeRelations.getNoDamageFrom().size(); i++ ) {
-                immune.append(typeRelations.getNoDamageFrom().get(i).getName());
-                if (i < typeRelations.getNoDamageFrom().size() - 1)
-                    immune.append(", ");
-            }
+            TypeRelations typeRelations = pokeApi.getType(type.get(0)).getDamageRelations();
+            logger.debug("getType API request received");
 
-            logger.trace("Finished assigning type relations");
+            for (int i = 0; i < typeRelations.getDoubleDamageFrom().size(); i++ )
+                weak.add(typeRelations.getDoubleDamageFrom().get(i).getName());
+            for (int i = 0; i < typeRelations.getHalfDamageFrom().size(); i++ )
+                resist.add(typeRelations.getHalfDamageFrom().get(i).getName());
+            for (int i = 0; i < typeRelations.getNoDamageFrom().size(); i++ )
+                immune.add(typeRelations.getNoDamageFrom().get(i).getName());
 
         } else if (pokemon.getTypes().size() == 2) {
 
+            logger.trace("Pokemon has 2 types");
 
+            TypeRelations type1Relations = pokeApi.getType(type.get(0)).getDamageRelations();
+            logger.trace("getType API received for type1");
+            TypeRelations type2Relations = pokeApi.getType(type.get(1)).getDamageRelations();
+            logger.trace("getType API received for type2");
+
+            ArrayList<String> weakTemp = new ArrayList<>();
+            ArrayList<String> resistTemp = new ArrayList<>();
+
+            for (int i = 0; i < type1Relations.getDoubleDamageFrom().size(); i++)
+                weakTemp.add(type1Relations.getDoubleDamageFrom().get(i).getName());
+            for (int i = 0; i < type1Relations.getHalfDamageFrom().size(); i++)
+                resistTemp.add(type1Relations.getHalfDamageFrom().get(i).getName());
+            // Add immune types
+            for (int i = 0; i < type1Relations.getNoDamageFrom().size(); i++)
+                immune.add(type1Relations.getNoDamageFrom().get(i).getName());
+
+            for (int i = 0; i < type2Relations.getDoubleDamageFrom().size(); i++) {
+                String typeName = type2Relations.getDoubleDamageFrom().get(i).getName();
+
+                // Add types with 1/4x weakness in bold
+                if (immune.contains(typeName)) {
+                    continue;
+                } else if (weakTemp.contains(typeName)) {
+                    weak.add("**" + typeName + "**");
+                    weakTemp.remove(typeName);
+                } else if (resistTemp.contains(typeName)) {
+                    resistTemp.remove(typeName);
+                }
+            }
+            // Add types with 4x resistance
+            for (int i = 0; i < type2Relations.getHalfDamageFrom().size(); i++) {
+                String typeName = type2Relations.getHalfDamageFrom().get(i).getName();
+                if (immune.contains(typeName)) {
+                    continue;
+                } else if (resistTemp.contains(typeName)) {
+                    resist.add("**" + typeName + "**");
+                    resistTemp.remove(typeName);
+                } else if (weakTemp.contains(typeName)) {
+                    weakTemp.remove(typeName);
+                }
+            }
+            // Finish adding immune types
+            for (int i = 0; i < type2Relations.getNoDamageFrom().size(); i++) {
+                String typeName = type2Relations.getNoDamageFrom().get(i).getName();
+                if (!immune.contains(typeName)) {
+                    immune.add(typeName);
+                }
+            }
+            // Add 1/2x weak types
+            weak.addAll(weakTemp);
+            // Add 2x resist types
+            resist.addAll(resistTemp);
 
         }
 
-        if (weak.toString().isEmpty())
-            weak.append("None");
-        if (resist.toString().isEmpty())
-            resist.append("None");
-        if (immune.toString().isEmpty())
-            immune.append("None");
+        if (weak.isEmpty()) weak.add("None");
+        if (resist.isEmpty()) resist.add("None");
+        if (immune.isEmpty()) immune.add("None");
+
+        logger.trace("Finished assigning type relations");
+
 
         builder.withAuthorName(pokemon.getName().substring(0, 1).toUpperCase() + pokemon.getName().substring(1));
         builder.withDescription("**Type:** `" + type.toString() + "`");
@@ -103,7 +147,8 @@ class BotUtils {
         builder.appendField("Resist", resist.toString(), false);
         builder.appendField("Immune", immune.toString(), false);
 
-        builder.withTimestamp(LocalDateTime.now(ZoneId.of("GMT")));
+        builder.withFooterText("* Types not listed are Neutral *");
+//        builder.withTimestamp(LocalDateTime.now(ZoneId.of("GMT")));
 
         logger.trace("Built embed");
 
