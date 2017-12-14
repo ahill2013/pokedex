@@ -91,34 +91,15 @@ class BotUtils {
             for (int i = 0; i < type1Relations.getNoDamageFrom().size(); i++)
                 immune.add(type1Relations.getNoDamageFrom().get(i).getName());
 
+            // Add types with 1/4x weakness in bold
             for (int i = 0; i < type2Relations.getDoubleDamageFrom().size(); i++) {
                 String typeName = type2Relations.getDoubleDamageFrom().get(i).getName();
-
-                // Add types with 1/4x weakness in bold
-                if (immune.contains(typeName)) {
-                    continue;
-                } else if (weakTemp.contains(typeName)) {
-                    weak.add("**" + typeName + "**");
-                    weakTemp.remove(typeName);
-                } else if (resistTemp.contains(typeName)) {
-                    resistTemp.remove(typeName);
-                } else {
-                    weakTemp.add(typeName);
-                }
+                findDoubleRelation(weak, immune, weakTemp, resistTemp, typeName);
             }
-            // Add types with 4x resistance
+            // Add types with 4x resistance in bold
             for (int i = 0; i < type2Relations.getHalfDamageFrom().size(); i++) {
                 String typeName = type2Relations.getHalfDamageFrom().get(i).getName();
-                if (immune.contains(typeName)) {
-                    continue;
-                } else if (resistTemp.contains(typeName)) {
-                    resist.add("**" + typeName + "**");
-                    resistTemp.remove(typeName);
-                } else if (weakTemp.contains(typeName)) {
-                    weakTemp.remove(typeName);
-                } else {
-                    resistTemp.add(typeName);
-                }
+                findDoubleRelation(resist, immune, resistTemp, weakTemp, typeName);
             }
             // Finish adding immune types
             for (int i = 0; i < type2Relations.getNoDamageFrom().size(); i++) {
@@ -140,7 +121,6 @@ class BotUtils {
 
         logger.trace("Finished assigning type relations");
 
-
         builder.withAuthorName(pokemon.getName().substring(0, 1).toUpperCase() + pokemon.getName().substring(1));
         builder.withDescription("**Type:** `" + type.toString() + "`");
         builder.withThumbnail(pokemon.getSprites().getFrontDefault());
@@ -155,6 +135,34 @@ class BotUtils {
 //        builder.withTimestamp(LocalDateTime.now(ZoneId.of("GMT")));
 
         logger.trace("Built embed");
+
+        return builder.build();
+
+    }
+
+    private static void findDoubleRelation(ArrayList<String> weak, ArrayList<String> immune, ArrayList<String> weakTemp, ArrayList<String> resistTemp, String typeName) {
+        if (immune.contains(typeName)) {
+            return;
+        } else if (weakTemp.contains(typeName)) {
+            weak.add("**" + typeName + "**");
+            weakTemp.remove(typeName);
+        } else if (resistTemp.contains(typeName)) {
+            resistTemp.remove(typeName);
+        } else {
+            weakTemp.add(typeName);
+        }
+    }
+
+    static EmbedObject buildHelpEmbed() {
+
+        EmbedBuilder builder = new EmbedBuilder();
+
+        builder.withAuthorIcon(CommandHandler._client.getOurUser().getAvatarURL());
+        builder.withAuthorName("Professor Willow Help");
+        builder.withDescription("Bot command prefix is: `>`");
+
+        builder.appendField("Commands", "`weak <pokémon>`\n`ping`\n`help`", true);
+        builder.appendField("Donate", "If you would like to help support server and development costs, or just want to say thanks, feel free to donate via [PayPal](https://paypal.me/pools/c/807lULTr0e)", true);
 
         return builder.build();
 

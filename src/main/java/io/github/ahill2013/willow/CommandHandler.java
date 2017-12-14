@@ -12,7 +12,7 @@ import java.util.*;
 
 public class CommandHandler {
 
-    private IDiscordClient _client;
+    static IDiscordClient _client;
     private Timer statusTimer;
     private TimerTask statusTask;
     private ArrayList<String> statusMessages;
@@ -31,21 +31,11 @@ public class CommandHandler {
         });
 
 
-        commandMap.put("embed", (event, args) ->
-                BotUtils.sendMessage(event.getChannel(), BotUtils.buildEmbedTest()));
+        commandMap.put("embed", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildEmbedTest()));
 
-        commandMap.put("ping", (event, args) ->
-                BotUtils.sendMessage(event.getChannel(), "pong"));
+        commandMap.put("ping", (event, args) -> BotUtils.sendMessage(event.getChannel(), "pong"));
 
-        commandMap.put("help", (event, args) -> {
-            StringBuilder helpMsg = new StringBuilder();
-            helpMsg.append("Bot command prefix is: '>'\n\n");
-            helpMsg.append("Available commands:\n");
-            helpMsg.append("ping").append(" - an easy way to see if the bot is alive");
-            helpMsg.append("help").append(" - This help message");
-
-            BotUtils.sendMessage(event.getChannel(), helpMsg.toString());
-        });
+        commandMap.put("help", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildHelpEmbed()));
 
     }
 
@@ -64,7 +54,7 @@ public class CommandHandler {
         statusTask = new TimerTask() {
             @Override
             public void run() {
-                _client.changePlayingText(statusMessages.get(statusIndex % statusMessages.size()));
+                _client.changePlayingText(statusMessages.get(statusIndex % statusMessages.size()) + " | >help");
                 statusIndex++;
             }
         };
