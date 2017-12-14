@@ -9,8 +9,16 @@ public class Willow {
     public static void main(String[] args) {
 
         // Pass the bot token in as a command line argument
-        String token = args[0];
-        client = BotUtils.getBuiltDiscordClient(token);
+        try {
+
+            String token = args[0];
+            client = BotUtils.getBuiltDiscordClient(token);
+
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.err.println("Please provide a token argument");
+            System.exit(2);
+        }
+
 
         // Register a listener via the EventSubscriber annotation which allows for organisation and delegation of events
         client.getDispatcher().registerListener(new CommandHandler(client));

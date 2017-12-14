@@ -102,6 +102,8 @@ class BotUtils {
                     weakTemp.remove(typeName);
                 } else if (resistTemp.contains(typeName)) {
                     resistTemp.remove(typeName);
+                } else {
+                    weakTemp.add(typeName);
                 }
             }
             // Add types with 4x resistance
@@ -114,6 +116,8 @@ class BotUtils {
                     resistTemp.remove(typeName);
                 } else if (weakTemp.contains(typeName)) {
                     weakTemp.remove(typeName);
+                } else {
+                    resistTemp.add(typeName);
                 }
             }
             // Finish adding immune types
