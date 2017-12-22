@@ -81,7 +81,12 @@ public class CommandHandler {
         argsList.remove(0); // Remove the command
 
         if (commandMap.containsKey(commandStr))
-            commandMap.get(commandStr).runCommand(event, argsList);
+            if (commandStr.equals("weak")) {    // Hard code specific channel to use weak command in. Ignore use in all other channels
+                if (event.getChannel().getStringID().equals("345755566989377547"))  //TODO: should probably make a web client to handle things like this similar to Mirai
+                    commandMap.get(commandStr).runCommand(event, argsList);
+            } else {
+                commandMap.get(commandStr).runCommand(event, argsList);
+            }
 
     }
 
