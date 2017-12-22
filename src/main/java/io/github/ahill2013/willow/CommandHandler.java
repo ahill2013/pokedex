@@ -25,11 +25,7 @@ public class CommandHandler {
     //Statically populate commandMap with functions
     static {
 
-        commandMap.put("weak", (event, args) -> {
-            BotUtils.buildWeakEmbed(args);
-            BotUtils.sendMessage(event.getChannel(), BotUtils.buildWeakEmbed(args));
-        });
-
+        commandMap.put("weak", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildWeakEmbed(args)));
 
         commandMap.put("embed", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildEmbedTest()));
 
@@ -39,7 +35,7 @@ public class CommandHandler {
 
     }
 
-    public CommandHandler(IDiscordClient client) {
+    CommandHandler(IDiscordClient client) {
 
         _client = client;
 
