@@ -22,7 +22,9 @@ public enum TypeColors {
     FAIRY    (0xEE99AC);
 
     private final int color;
+
     TypeColors(int color) { this.color = color; }
 
     int getColor() { return color; }
+
 }

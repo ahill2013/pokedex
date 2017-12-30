@@ -123,7 +123,7 @@ class BotUtils {
 
         builder.withAuthorName(pokemon.getName().substring(0, 1).toUpperCase() + pokemon.getName().substring(1));
         builder.withDescription("**Type:** `" + type.toString() + "`");
-        builder.withColor(TypeColors.valueOf(type.get(0).toUpperCase()).getColor());
+        builder.withColor(findColor(type.get(0)));
         builder.withThumbnail(pokemon.getSprites().getFrontDefault());
 
         logger.trace("Past thumbnail assignment: " + pokemon.getSprites().getFrontDefault());
@@ -139,6 +139,10 @@ class BotUtils {
 
         return builder.build();
 
+    }
+
+    private static int findColor(String type) {
+        return TypeColors.valueOf(type.toUpperCase()).getColor();
     }
 
     private static void findDoubleRelation(ArrayList<String> weak, ArrayList<String> immune, ArrayList<String> weakTemp, ArrayList<String> resistTemp, String typeName) {
