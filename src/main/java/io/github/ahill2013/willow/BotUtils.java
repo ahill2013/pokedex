@@ -40,93 +40,66 @@ class BotUtils {
 
         EmbedBuilder builder = new EmbedBuilder();
 
-        Pokemon pokemon = pokeApi.getPokemon(pokemonType.get(0));
-        logger.debug("getPokemon API request received");
-        ArrayList<String> type = new ArrayList<>(2);
+        ArrayList<ArrayList<String>> categories = new ArrayList<>();
 
-        if (pokemon.getTypes().size() == 2) {
-            type.add(pokemon.getTypes().get(0).getType().getName());
-            type.add(pokemon.getTypes().get(1).getType().getName());
-        } else {
-            type.add(pokemon.getTypes().get(0).getType().getName());
+
+        //Pokemon pokemon = null;
+        ArrayList<String> type = null;
+
+        try {
+
+            logger.debug("Attempting getPokemon query");
+            Pokemon pokemon = pokeApi.getPokemon(pokemonType.get(0));
+            logger.debug("getPokemon API request received");
+
+            type = new ArrayList<>(2);
+
+            if (pokemon.getTypes().size() == 2) {
+                type.add(pokemon.getTypes().get(0).getType().getName());
+                type.add(pokemon.getTypes().get(1).getType().getName());
+            } else {
+                type.add(pokemon.getTypes().get(0).getType().getName());
+            }
+
+            if (type.size() == 1) {
+
+                logger.trace("Pokemon has 1 type");
+
+                categories = calculate1Type(type);
+
+            } else if (type.size() == 2) {
+
+                logger.trace("Pokemon has 2 types");
+
+                categories = calculate2Types(type);
+
+            }
+
+            logger.trace("Finished assigning type relations");
+
+            builder.withAuthorName(pokemon.getName().substring(0, 1).toUpperCase() + pokemon.getName().substring(1));
+            builder.withDescription("**Type:** `" + type.toString() + "`");
+            builder.withColor(findColor(type.get(0)));
+            builder.withThumbnail(pokemon.getSprites().getFrontDefault());
+
+            logger.trace("Past thumbnail assignment: " + pokemon.getSprites().getFrontDefault());
+
+        } catch (Throwable t) {
+
+            logger.error(t.getMessage());
+            //logger.debug("Attempting getType query");
+
+
+
         }
 
-//        logger.debug("Type1: " + type1 + " ; Type2: " + type2);
-
-        ArrayList<String> weak = new ArrayList<>();
-        ArrayList<String> resist = new ArrayList<>();
-        ArrayList<String> immune = new ArrayList<>();
-
-        if (type.size() == 1) {
-
-            logger.trace("Pokemon has 1 type");
-
-            TypeRelations typeRelations = pokeApi.getType(type.get(0)).getDamageRelations();
-            logger.debug("getType API request received");
-
-            for (int i = 0; i < typeRelations.getDoubleDamageFrom().size(); i++ )
-                weak.add(typeRelations.getDoubleDamageFrom().get(i).getName());
-            for (int i = 0; i < typeRelations.getHalfDamageFrom().size(); i++ )
-                resist.add(typeRelations.getHalfDamageFrom().get(i).getName());
-            for (int i = 0; i < typeRelations.getNoDamageFrom().size(); i++ )
-                immune.add(typeRelations.getNoDamageFrom().get(i).getName());
-
-        } else if (type.size() == 2) {
-
-            logger.trace("Pokemon has 2 types");
-
-            TypeRelations type1Relations = pokeApi.getType(type.get(0)).getDamageRelations();
-            logger.trace("getType API received for type1");
-            TypeRelations type2Relations = pokeApi.getType(type.get(1)).getDamageRelations();
-            logger.trace("getType API received for type2");
-
-            ArrayList<String> weakTemp = new ArrayList<>();
-            ArrayList<String> resistTemp = new ArrayList<>();
-
-            for (int i = 0; i < type1Relations.getDoubleDamageFrom().size(); i++)
-                weakTemp.add(type1Relations.getDoubleDamageFrom().get(i).getName());
-            for (int i = 0; i < type1Relations.getHalfDamageFrom().size(); i++)
-                resistTemp.add(type1Relations.getHalfDamageFrom().get(i).getName());
-            // Add immune types
-            for (int i = 0; i < type1Relations.getNoDamageFrom().size(); i++)
-                immune.add(type1Relations.getNoDamageFrom().get(i).getName());
-
-            // Add types with 1/4x weakness in bold
-            for (int i = 0; i < type2Relations.getDoubleDamageFrom().size(); i++) {
-                String typeName = type2Relations.getDoubleDamageFrom().get(i).getName();
-                findDoubleRelation(weak, immune, weakTemp, resistTemp, typeName);
-            }
-            // Add types with 4x resistance in bold
-            for (int i = 0; i < type2Relations.getHalfDamageFrom().size(); i++) {
-                String typeName = type2Relations.getHalfDamageFrom().get(i).getName();
-                findDoubleRelation(resist, immune, resistTemp, weakTemp, typeName);
-            }
-            // Finish adding immune types
-            for (int i = 0; i < type2Relations.getNoDamageFrom().size(); i++) {
-                String typeName = type2Relations.getNoDamageFrom().get(i).getName();
-                if (!immune.contains(typeName)) {
-                    immune.add(typeName);
-                }
-            }
-            // Add 1/2x weak types
-            weak.addAll(weakTemp);
-            // Add 2x resist types
-            resist.addAll(resistTemp);
-
-        }
+        ArrayList<String> weak = categories.get(0);
+        ArrayList<String> resist = categories.get(1);
+        ArrayList<String> immune = categories.get(2);
 
         if (weak.isEmpty()) weak.add("None");
         if (resist.isEmpty()) resist.add("None");
         if (immune.isEmpty()) immune.add("None");
-
-        logger.trace("Finished assigning type relations");
-
-        builder.withAuthorName(pokemon.getName().substring(0, 1).toUpperCase() + pokemon.getName().substring(1));
-        builder.withDescription("**Type:** `" + type.toString() + "`");
-        builder.withColor(findColor(type.get(0)));
-        builder.withThumbnail(pokemon.getSprites().getFrontDefault());
-
-        logger.trace("Past thumbnail assignment: " + pokemon.getSprites().getFrontDefault());
 
         builder.appendField("Weak", weak.toString(), false);
         builder.appendField("Resist", resist.toString(), false);
@@ -139,6 +112,80 @@ class BotUtils {
 
         return builder.build();
 
+    }
+
+    private static ArrayList<ArrayList<String>> calculate1Type(ArrayList<String> type) {
+        TypeRelations typeRelations = pokeApi.getType(type.get(0)).getDamageRelations();
+        logger.debug("getType API request received");
+
+        ArrayList<String> weak = new ArrayList<>();
+        ArrayList<String> resist = new ArrayList<>();
+        ArrayList<String> immune = new ArrayList<>();
+
+        for (int i = 0; i < typeRelations.getDoubleDamageFrom().size(); i++ )
+            weak.add(typeRelations.getDoubleDamageFrom().get(i).getName());
+        for (int i = 0; i < typeRelations.getHalfDamageFrom().size(); i++ )
+            resist.add(typeRelations.getHalfDamageFrom().get(i).getName());
+        for (int i = 0; i < typeRelations.getNoDamageFrom().size(); i++ )
+            immune.add(typeRelations.getNoDamageFrom().get(i).getName());
+
+        ArrayList<ArrayList<String>> categories = new ArrayList<>();
+        categories.add(weak);
+        categories.add(resist);
+        categories.add(immune);
+
+        return categories;
+    }
+
+    private static ArrayList<ArrayList<String>> calculate2Types(ArrayList<String> type) {
+        TypeRelations type1Relations = pokeApi.getType(type.get(0)).getDamageRelations();
+        logger.trace("getType API received for type1");
+        TypeRelations type2Relations = pokeApi.getType(type.get(1)).getDamageRelations();
+        logger.trace("getType API received for type2");
+
+        ArrayList<String> weak = new ArrayList<>();
+        ArrayList<String> resist = new ArrayList<>();
+        ArrayList<String> immune = new ArrayList<>();
+
+        ArrayList<String> weakTemp = new ArrayList<>();
+        ArrayList<String> resistTemp = new ArrayList<>();
+
+        for (int i = 0; i < type1Relations.getDoubleDamageFrom().size(); i++)
+            weakTemp.add(type1Relations.getDoubleDamageFrom().get(i).getName());
+        for (int i = 0; i < type1Relations.getHalfDamageFrom().size(); i++)
+            resistTemp.add(type1Relations.getHalfDamageFrom().get(i).getName());
+        // Add immune types
+        for (int i = 0; i < type1Relations.getNoDamageFrom().size(); i++)
+            immune.add(type1Relations.getNoDamageFrom().get(i).getName());
+
+        // Add types with 1/4x weakness in bold
+        for (int i = 0; i < type2Relations.getDoubleDamageFrom().size(); i++) {
+            String typeName = type2Relations.getDoubleDamageFrom().get(i).getName();
+            findDoubleRelation(weak, immune, weakTemp, resistTemp, typeName);
+        }
+        // Add types with 4x resistance in bold
+        for (int i = 0; i < type2Relations.getHalfDamageFrom().size(); i++) {
+            String typeName = type2Relations.getHalfDamageFrom().get(i).getName();
+            findDoubleRelation(resist, immune, resistTemp, weakTemp, typeName);
+        }
+        // Finish adding immune types
+        for (int i = 0; i < type2Relations.getNoDamageFrom().size(); i++) {
+            String typeName = type2Relations.getNoDamageFrom().get(i).getName();
+            if (!immune.contains(typeName)) {
+                immune.add(typeName);
+            }
+        }
+        // Add 1/2x weak types
+        weak.addAll(weakTemp);
+        // Add 2x resist types
+        resist.addAll(resistTemp);
+
+        ArrayList<ArrayList<String>> categories = new ArrayList<>();
+        categories.add(weak);
+        categories.add(resist);
+        categories.add(immune);
+
+        return categories;
     }
 
     private static int findColor(String type) {

@@ -12,7 +12,7 @@ public class WillowTest {
         PokeApi pokeApi = new PokeApiClient();
         Assert.assertNotNull(pokeApi);
 
-        System.out.println(pokeApi.getPokemon("lapras"));
+        System.out.println(pokeApi.getPokemon("ice"));
 
         //Assert.assertTrue(false);
     }
