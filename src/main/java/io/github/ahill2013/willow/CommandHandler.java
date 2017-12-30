@@ -81,10 +81,14 @@ public class CommandHandler {
         argsList.remove(0); // Remove the command
 
         if (commandMap.containsKey(commandStr))
-            if (commandStr.equals("weak")) {    // Hard code specific channel to use weak command in. Ignore use in all other channels
-                if (event.getChannel().getStringID().equals("345755566989377547"))  //TODO: should probably make a web client to handle things like this similar to Mirai
+            if (event.getGuild().getStringID().equals("343563240564850690")) { // stuff specifically for my pokemon server
+                if (commandStr.equals("weak")) {    // Hard code specific channel to use weak command in. Ignore use in all other channels
+                    if (event.getChannel().getStringID().equals("345755566989377547"))  //TODO: should probably make a web client to handle things like this similar to Mirai
+                        commandMap.get(commandStr).runCommand(event, argsList);
+                } else {
                     commandMap.get(commandStr).runCommand(event, argsList);
-            } else {
+                }
+            } else { // all other servers just execute commands in any channel
                 commandMap.get(commandStr).runCommand(event, argsList);
             }
 

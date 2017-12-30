@@ -57,7 +57,7 @@ class BotUtils {
         ArrayList<String> resist = new ArrayList<>();
         ArrayList<String> immune = new ArrayList<>();
 
-        if (pokemon.getTypes().size() == 1) {
+        if (type.size() == 1) {
 
             logger.trace("Pokemon has 1 type");
 
@@ -71,7 +71,7 @@ class BotUtils {
             for (int i = 0; i < typeRelations.getNoDamageFrom().size(); i++ )
                 immune.add(typeRelations.getNoDamageFrom().get(i).getName());
 
-        } else if (pokemon.getTypes().size() == 2) {
+        } else if (type.size() == 2) {
 
             logger.trace("Pokemon has 2 types");
 
@@ -123,6 +123,7 @@ class BotUtils {
 
         builder.withAuthorName(pokemon.getName().substring(0, 1).toUpperCase() + pokemon.getName().substring(1));
         builder.withDescription("**Type:** `" + type.toString() + "`");
+        builder.withColor(TypeColors.valueOf(type.get(0).toUpperCase()).getColor());
         builder.withThumbnail(pokemon.getSprites().getFrontDefault());
 
         logger.trace("Past thumbnail assignment: " + pokemon.getSprites().getFrontDefault());
