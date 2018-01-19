@@ -15,7 +15,6 @@ import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.util.ArrayList;
-import java.util.List;
 
 class BotUtils {
 
@@ -34,7 +33,7 @@ class BotUtils {
 
     }
 
-    static EmbedObject buildWeakEmbed(List<String> pokemonType) {
+    static EmbedObject buildWeakEmbed(ArrayList<String> pokemonType) {
 
         logger.trace("Entered buildWeakEmbed");
 
@@ -62,17 +61,11 @@ class BotUtils {
             }
 
             if (type.size() == 1) {
-
                 logger.trace("Pokemon has 1 type");
-
                 categories = calculate1Type(type);
-
             } else if (type.size() == 2) {
-
                 logger.trace("Pokemon has 2 types");
-
                 categories = calculate2Types(type);
-
             }
 
             logger.trace("Finished assigning type relations");
@@ -86,10 +79,32 @@ class BotUtils {
 
         } catch (Throwable t) {
 
-            logger.error(t.getMessage());
-            //logger.debug("Attempting getType query");
+            try {
 
+                logger.error(t.getMessage());
+                logger.debug("Attempting getType query");
+                if (pokemonType.size() == 1) {
+                    logger.trace("One type detected");
+                    categories = calculate1Type(pokemonType);
+                } else if (pokemonType.size() == 2) {
+                    logger.trace("Two types detected");
+                    pokemonType.add(0, pokemonType.get(0).replace(",", ""));
+                    pokemonType.remove(1);
+                    categories = calculate2Types(pokemonType);
+                }
 
+                logger.trace("Finished assigning type relations");
+
+                builder.withAuthorName(pokemonType.toString());
+                builder.withColor(findColor(pokemonType.get(0)));
+
+            } catch (Throwable t2) {
+
+                logger.error(t2.getMessage());
+                logger.debug("Input is not a Pokemon or Type");
+                return null;
+
+            }
 
         }
 
@@ -139,9 +154,9 @@ class BotUtils {
 
     private static ArrayList<ArrayList<String>> calculate2Types(ArrayList<String> type) {
         TypeRelations type1Relations = pokeApi.getType(type.get(0)).getDamageRelations();
-        logger.trace("getType API received for type1");
+        logger.trace("getType API request received for type1");
         TypeRelations type2Relations = pokeApi.getType(type.get(1)).getDamageRelations();
-        logger.trace("getType API received for type2");
+        logger.trace("getType API request received for type2");
 
         ArrayList<String> weak = new ArrayList<>();
         ArrayList<String> resist = new ArrayList<>();
@@ -220,6 +235,11 @@ class BotUtils {
 
     }
 
+    public static String parseRole(ArrayList<String> args) {
+
+        return null;
+    }
+
     static EmbedObject buildEmbedTest() {
 
         EmbedBuilder builder = new EmbedBuilder();
@@ -244,7 +264,8 @@ class BotUtils {
         builder.withFooterIcon("http://i.imgur.com/Ch0wy1e.png");
         builder.withFooterText("footerText");
         builder.withFooterIcon("http://i.imgur.com/TELh8OT.png");
-        builder.withThumbnail("http://i.imgur.com/7heQOCt.png");
+        builder.withThumbnail(TypeColors.GRASS.getUrl());
+        builder.withThumbnail(TypeColors.FIRE.getUrl());
 
         builder.appendDesc(" + appendDesc");
         builder.appendDescription(" + appendDescription");

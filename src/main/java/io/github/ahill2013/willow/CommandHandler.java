@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.*;
@@ -25,11 +24,13 @@ public class CommandHandler {
     //Statically populate commandMap with functions
     static {
 
+        commandMap.put("role", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.parseRole(args)));
+
         commandMap.put("weak", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildWeakEmbed(args)));
 
-        commandMap.put("embed", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildEmbedTest()));
-
         commandMap.put("ping", (event, args) -> BotUtils.sendMessage(event.getChannel(), "pong"));
+
+        commandMap.put("embed", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildEmbedTest()));
 
         commandMap.put("help", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildHelpEmbed()));
 
@@ -77,7 +78,7 @@ public class CommandHandler {
         // Grab the command without the prefix
         String commandStr = argArray[0].substring(BotUtils.BOT_PREFIX.length());
         // Switch to a List for safer access of arguments
-        List<String> argsList = new ArrayList<>(Arrays.asList(argArray));
+        ArrayList<String> argsList = new ArrayList<>(Arrays.asList(argArray));
         argsList.remove(0); // Remove the command
 
         if (commandMap.containsKey(commandStr))
@@ -92,11 +93,6 @@ public class CommandHandler {
                 commandMap.get(commandStr).runCommand(event, argsList);
             }
 
-    }
-
-    @EventSubscriber
-    public void onMessageDeleted(MessageDeleteEvent event) {
-        logger.debug("Message deleted: " + event.getMessage().getContent());
     }
 
 }
