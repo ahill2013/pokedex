@@ -24,11 +24,11 @@ public class CommandHandler {
     //Statically populate commandMap with functions
     static {
 
-        commandMap.put("role", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.parseRole(args)));
+        commandMap.put("role", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.parseRole(event, args)));
 
         commandMap.put("weak", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildWeakEmbed(args)));
 
-        commandMap.put("ping", (event, args) -> BotUtils.sendMessage(event.getChannel(), "pong"));
+        commandMap.put("ping", (event, args) -> BotUtils.sendMessage(event.getChannel(), ":white_check_mark: pong"));
 
         commandMap.put("embed", (event, args) -> BotUtils.sendMessage(event.getChannel(), BotUtils.buildEmbedTest()));
 

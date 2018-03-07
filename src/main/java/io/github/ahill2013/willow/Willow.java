@@ -1,10 +1,13 @@
 package io.github.ahill2013.willow;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sx.blah.discord.api.IDiscordClient;
 
 public class Willow {
 
     private static IDiscordClient client;
+    private static final Logger logger = LogManager.getLogger(Willow.class);
 
     public static void main(String[] args) {
 

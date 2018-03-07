@@ -9,19 +9,30 @@ import org.apache.logging.log4j.Logger;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.RequestBuffer;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Hashtable;
+import java.util.List;
 
 class BotUtils {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(BotUtils.class);
     private static final PokeApi pokeApi = new PokeApiClient();
 
     static final String BOT_PREFIX = ">";
+    static final String CONFIG_FILE = "willow.config";
+    static Hashtable<String, List<String>> hashtable;
 
     static IDiscordClient getBuiltDiscordClient(String token){
 
@@ -43,7 +54,7 @@ class BotUtils {
 
 
         //Pokemon pokemon = null;
-        ArrayList<String> type = null;
+        ArrayList<String> type;
 
         try {
 
@@ -235,11 +246,122 @@ class BotUtils {
 
     }
 
-    public static String parseRole(ArrayList<String> args) {
+    public static String parseRole(MessageReceivedEvent event, ArrayList<String> args) {
 
-        return null;
+        logger.trace("Entered parseRole()");
+
+        //Hashtable<String, List<String>> ht = new Hashtable<>();
+        List<String> cmdRoleList;
+        List<String> guildRoleList = new ArrayList<>();
+        for (IRole role : event.getGuild().getRoles() ) {
+            guildRoleList.add(role.getName());
+        }
+
+        String guildID = event.getGuild().getStringID();
+
+        try {
+            logger.debug("Attempting hashtable.get(guildID)");
+            cmdRoleList = hashtable.get(guildID);
+        } catch (NullPointerException e) {
+            logger.warn(e.getCause());
+            cmdRoleList = new ArrayList<>();
+            try {
+                hashtable.put(guildID, guildRoleList);
+            } catch (NullPointerException f) {
+                logger.error("Another null exception");
+                f.printStackTrace();
+            }
+        }
+
+
+        logger.debug(cmdRoleList);
+
+        StringBuilder response = new StringBuilder();
+
+        // parse args
+        if (args.size() == 0) {
+            response.append(":x: No action specified.\n");
+            response.append("\n`add` - add a role from the list");
+            response.append("\n`remove` - remove a role on the list");
+            response.append("\n`list` - list available roles");
+            response.append("\n**Admin**");
+            response.append("\n`add-role`");
+            response.append("\n`remove-role`");
+        } else {
+            switch (args.get(0)) {
+                case "add":
+                    logger.trace("case 'add'");
+                    break;
+                case "remove":
+                    logger.trace("case 'remove'");
+                    break;
+                case "list":
+                    logger.trace("case 'list'");
+                    break;
+                case "add-role":
+                    logger.trace("case 'add-role'");
+                    if (event.getAuthor().hasRole(event.getGuild().getRoleByID(Long.parseLong("345382950155714573")))) {
+                        String newRoleName = "";
+                        // concatenate remaining args to get full new role name
+                        for (int i=1; i<args.size(); i++) {
+                            newRoleName += args.get(i) + " ";
+                        }
+                        // check if role is already in list
+                        boolean inList = false;
+                        for (String role : cmdRoleList) {
+                            if (role.equals(newRoleName))
+                                inList = true;
+                        }
+                        logger.debug("inList: " + inList);
+                        if (!inList) {
+                            //check if role is in guild
+                            boolean inGuild = false;
+                            for (String role : guildRoleList) {
+                                if (role.equals(newRoleName))
+                                    inGuild = true;
+                            }
+                            logger.debug("inGuild: " + inGuild);
+                            if (inGuild) {
+                                cmdRoleList.add(event.getGuild().getRolesByName(newRoleName).get(0).getName());
+                            } else {
+                                IRole newRole = event.getGuild().createRole();
+                                newRole.changePermissions(EnumSet.noneOf(Permissions.class));
+                                newRole.changeName(newRoleName);
+                                newRole.changeMentionable(true);
+                                cmdRoleList.add(newRole.getName());
+                            }
+                            hashtable.put(guildID, cmdRoleList);
+                            try {
+                                FileOutputStream fileOut = new FileOutputStream(CONFIG_FILE);
+                                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                                out.writeObject(hashtable);
+                                out.flush();
+                                out.close();
+                                fileOut.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            response.append(":white_check_mark: New role added to list: ").append(newRoleName);
+                        } else {
+                            response.append(":x: Role is already in list");
+                        }
+                    } else {
+                        response.append(":x: User does not have required role to use this command.");
+                    }
+                    break;
+                case "remove-role":
+                    logger.trace("case 'remove-role'");
+                    break;
+                default:
+                    logger.trace("case 'default'");
+                    response.append(":x: Invalid sub-command");
+            }
+        }
+
+        return response.toString();
     }
 
+    // purely a test/example function for embeds
     static EmbedObject buildEmbedTest() {
 
         EmbedBuilder builder = new EmbedBuilder();
